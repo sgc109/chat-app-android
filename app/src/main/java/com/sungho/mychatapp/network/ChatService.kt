@@ -14,7 +14,4 @@ interface ChatService {
 
     @Send
     fun sendChatMessage(message: ChatMessage)
-
-    @Send
-    fun sendTextTest(text: String)
 }

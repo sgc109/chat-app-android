@@ -1,6 +1,13 @@
 package com.sungho.mychatapp.di
 
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProviders
+import androidx.room.Room
 import com.facebook.stetho.okhttp3.StethoInterceptor
+import com.sungho.mychatapp.ChatRoomRepository
+import com.sungho.mychatapp.ChatRoomViewModel
+import com.sungho.mychatapp.ChatRoomViewModelFactory
+import com.sungho.mychatapp.database.AppDatabase
 import com.sungho.mychatapp.network.ChatService
 import com.tinder.scarlet.Lifecycle
 import com.tinder.scarlet.Scarlet
@@ -13,6 +20,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 
 val appModule = module {
+    single {
+        Room.databaseBuilder(get(), AppDatabase::class.java, "app-database").build()
+    }
+
+    single { get<AppDatabase>().chatMessageDao() }
+
     single {
         OkHttpClient.Builder()
                 .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
@@ -36,4 +49,10 @@ val appModule = module {
     }
 
     single { get<Scarlet>().create<ChatService>() }
+
+    single { ChatRoomRepository(get(), get()) }
+
+    factory { (activity: FragmentActivity) ->
+        ViewModelProviders.of(activity, ChatRoomViewModelFactory(get(), get())).get(ChatRoomViewModel::class.java)
+    }
 }
